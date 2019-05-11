@@ -16,6 +16,6 @@ O que foi adicionado ao jogo original:
 
 Parte 2:
 Diferenças de abordagens em relação ao primeiro jogo: 
-        - O setTimeout da função start() é implementado em uma Promise (startTimeoutPromise())
-        - Todos os setInterval são implementados com Promises
-        - A lógica do jogo em si não foi alterada, porém com o uso de Promises, as lógicas das funções que usam setInterval e setTimeout tiveram que ser modificadas, retornando um array contendo a referência (ou identificador) para o setInterval ou setTimeout executado
+  - O setTimeout da função start() é implementado em uma Promise (startTimeoutPromise())
+  - Todos os setInterval são implementados com Promises
+  - A lógica do jogo em si não foi alterada, porém com o uso de Promises, as lógicas das funções que usam setInterval e setTimeout tiveram que ser modificadas, retornando um array contendo a referência (ou identificador) para o setInterval ou setTimeout executado
