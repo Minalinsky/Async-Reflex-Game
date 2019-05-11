@@ -8,3 +8,11 @@ O que foi adicionado ao jogo original:
   - Quantidade de rounds para vencer (5)
   - Tela de vencedor
   - Efeito de "piscar" na escrita do vencedor do jogo (setInterval)
+
+
+
+
+
+Ajustar o delay para reiniciar a partida
+ajustar qtde de vitorias (winCondition)
+descomentar blink (funcao winner)
