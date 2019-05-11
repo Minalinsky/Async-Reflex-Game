@@ -24,6 +24,18 @@
         height: inherit;
         padding: 30px;
       }
+
+      #winner{
+        margin: auto;
+        max-width: 70%;
+        align-self: center;
+        border: 12px solid;
+        border-color: rgb(255, 102, 0);
+        color: rgb(255, 102, 0);
+        font-size: 8rem;
+        word-wrap: break-word;
+        text-align: center;
+      }
       .topbar {
         height: 50%;
         display: flex;
@@ -98,15 +110,25 @@
 
     <section class="ui">
       <div class="topbar">
-        <p class="p1">Player 1: "A"</p>
-        <p class="p2">Player 2: "L"</p>
+        <p class="p1">Player 1: 'A' <br> Score: 0</p>
+        <p class="p2">Player 2: 'L'<br> Score: 0</p>
         <div class="middlebar">
           <button>Start game</button>
           <p class="result"></p>
         </div>
       </div>
+
+      <p id = "winner">WINNER</p>
     </section>
     <script>
+        var scorep1 = 0;
+        var scorep2 = 0;
+        var p1 = document.querySelector('.p1');
+        var p2 = document.querySelector('.p2');
+
+        const winnerContainer = document.getElementById("winner");
+        winnerContainer.style.display = 'none';
+        const winCondition = 2; //Quantidade de rounds ganhos para vencer
         const spinner = document.querySelector('.spinner p'); //elemento que contém o simbolo ↻ que irá rotacionar
         const spinnerContainer = document.querySelector('.spinner');
         let rotateCount = 0;
@@ -114,6 +136,8 @@
         let rAF;
         const btn = document.querySelector('button'); //botao de Start
         const result = document.querySelector('.result');
+
+        var shakeIntervalID = null;
 
         function random(min,max) {
             var num = Math.floor(Math.random()*(max-min)) + min;
@@ -134,10 +158,21 @@
             rAF = requestAnimationFrame(draw); 
         }
 
-        function reset() { //volta o jogo ao estado inicial
+        function reset() { //volta o jogo ao estado inicial para recomeçá-lo
+            if((scorep1 || scorep2) >= winCondition){
+                scorep1 = 0;
+                scorep2 = 0;
+                p1.innerHTML = "Player 1: 'A' <br> Score: 0";
+                p2.innerHTML = "Player 1: 'A' <br> Score: 0";
+            }
+
             btn.style.display = 'block';
+            p1.style.display = 'block';
+            p2.style.display = 'block';
             result.textContent = '';
             result.style.display = 'none';
+            winnerContainer.style.display = 'none';
+            clearInterval(shakeIntervalID);
         }
 
         function start() { //chamada ao apertar o botao de Play
@@ -158,14 +193,60 @@
             function keyHandler(e) { //funcao para identificar quan tecla foi apertada
                 console.log(e.key);
                 if(e.key === 'a') {
-                result.textContent = 'Player 1 won!!';
+                    scorep1++;
+                    console.log("scorep1: " + scorep1); //imprimindo no console a pontuacao
+                    p1.innerHTML = "Player 1: 'A' <br>Score: " + scorep1;
+                    result.textContent = 'Player 1 won!!';
+                    if(scorep1 >= winCondition){ //se p1 fez 5 pontos (venceu)
+                        winner("Player1"); //passa a string Player1 como parametro de winner, que ira finalizar o jogo
+                    }
                 } else if(e.key === 'l') {
-                result.textContent = 'Player 2 won!!';
+                    scorep2++;
+                    console.log("scorep2: " + scorep1); //imprimindo no console a pontuacao
+                    p2.innerHTML = "Player 2: 'L' <br>Score: " + scorep2;
+                    result.textContent = 'Player 2 won!!';
+                    if(scorep2 >= winCondition){ //se p2 fez 5 pontos (venceu a partida)
+                        winner("Player2"); //passa a string Player2 como parametro de winner
+                    }
+                }
+                document.removeEventListener('keydown', keyHandler); 
+                setTimeout(reset, 3000); //após 5s reseta o jogo para o estado inicial
+            };
+        }
+
+        function blink(elem) { //faz o elemento passado piscar na tela
+            setInterval(function() {
+                elem.style.display = (elem.style.display == 'none' ? '' : 'none');
+            }, 500); 
+        }
+
+        function shake(elem){ //faz o elemento passado balancar (usado na tela de vencedor)
+            let shakeRotCount = 0; //rotacao para a funcao shake
+            shakeIntervalID = setInterval(frame, 5);
+
+            function frame(){
+                if(shakeRotCount <= 30){
+                    elem.style.transform = 'rotate(' + shakeRotCount + 'deg)';
+                    shakeRotCount++;
                 }
 
-                document.removeEventListener('keydown', keyHandler); 
-                setTimeout(reset, 5000); //após 5s reseta o jogo para o estado inicial
-            };
+                else{
+                    shakeRotCount = -70;
+                    elem.style.transform = 'rotate(' + shakeRotCount + 'deg)';
+                    shakeRotCount--;
+                    }
+
+            }
+        }
+        
+        function winner(player){ //recebe o jogador vencedor e mostra na tela
+            result.style.display = 'none';
+            p1.style.display = 'none';
+            p2.style.display = 'none';
+            winnerContainer.style.display = 'block';
+            winnerContainer.textContent = player + " WON!!";
+            //blink(winnerContainer);
+            shake(winnerContainer);
         }
 
         result.style.display = "none";
