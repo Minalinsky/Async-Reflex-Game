@@ -70,6 +70,9 @@
         align-items: center;
         justify-content: space-between;
       }
+      .instructions{
+          font-size: 110%;
+      }
       /* Button-specific styling */
       button {
         border: 0;
@@ -116,7 +119,22 @@
           <button>Start game</button>
           <p class="result"></p>
         </div>
-      </div>
+    </div>
+    <p class = "instructions"> Este jogo é ao menos 25% mais complexo que o original devido às seguintes mudanças: <br><br>
+        - Cor de fundo alterada<br>
+        - Scores para os jogadores<br>
+        - O jogo reinicia os scores quando a condição de vitória for alcançada (clearInterval)<br>
+        - Adicionada quantidade de rounds para um jogador vencer a partida (5 rounds)<br>
+        - Adicionada tela de vencedor (Fim de jogo)<br>
+        - Efeito de "piscar" na escrita do vencedor (setInterval)<br>
+        - Efeito de "chacoalhar" na escrita do vencedor (setInterval)<br><br><br>
+
+        Como Jogar: <br>
+        - Apertar o botão "StartGame"<br>
+        - Esperar até que o símbolo pare de girar e apareça a mensagem "Players Go!!"<br>
+        - O primeiro jogador a atingir 5 vitórias vence<br>
+        - Ao final do jogo, aguardar 5 segundos na tela do vencedor. O jogo reiniciará automaticamente
+    </p>
 
       <p id = "winner">WINNER</p>
     </section>
@@ -179,6 +197,7 @@
         }
 
         function start() { //chamada ao apertar o botao de Play
+            document.querySelector('.instructions').style.display = 'none'; //apaga as instruções da tela na primeira execução
             draw();
             spinnerContainer.style.display = 'block';
             btn.style.display = 'none';
