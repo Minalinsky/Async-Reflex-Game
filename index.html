@@ -128,16 +128,18 @@
 
         const winnerContainer = document.getElementById("winner");
         winnerContainer.style.display = 'none';
-        const winCondition = 2; //Quantidade de rounds ganhos para vencer
+        const winCondition = 5; //Quantidade de rounds ganhos para vencer
         const spinner = document.querySelector('.spinner p'); //elemento que contém o simbolo ↻ que irá rotacionar
         const spinnerContainer = document.querySelector('.spinner');
         let rotateCount = 0;
         let startTime = null;
         let rAF;
+        let shakeRotCount = 0; //rotacao para as funcoes shake
         const btn = document.querySelector('button'); //botao de Start
         const result = document.querySelector('.result');
 
         var shakeIntervalID = null;
+        var blinkIntervalID = null;
 
         function random(min,max) {
             var num = Math.floor(Math.random()*(max-min)) + min;
@@ -165,7 +167,8 @@
                 p1.innerHTML = "Player 1: 'A' <br> Score: 0";
                 p2.innerHTML = "Player 1: 'A' <br> Score: 0";
             }
-
+            clearInterval(shakeIntervalID);
+            clearInterval(blinkIntervalID);
             btn.style.display = 'block';
             p1.style.display = 'block';
             p2.style.display = 'block';
@@ -179,7 +182,7 @@
             draw();
             spinnerContainer.style.display = 'block';
             btn.style.display = 'none';
-            setTimeout(setEndgame, random(1000,2000)); //sorteia o tempo até os jogadores poderem apertar as teclas
+            setTimeout(setEndgame, random(2000,7000)); //sorteia o tempo até os jogadores poderem apertar as teclas
         }
 
         function setEndgame() { //libera os jogadores para apertar as teclas
@@ -210,32 +213,41 @@
                     }
                 }
                 document.removeEventListener('keydown', keyHandler); 
-                setTimeout(reset, 3000); //após 5s reseta o jogo para o estado inicial
+                setTimeout(reset, 5000); //após 5s reseta o jogo para o estado inicial
             };
         }
 
         function blink(elem) { //faz o elemento passado piscar na tela
-            setInterval(function() {
+            blinkIntervalID = setInterval(function() {
                 elem.style.display = (elem.style.display == 'none' ? '' : 'none');
-            }, 500); 
+            }, 400); 
         }
 
-        function shake(elem){ //faz o elemento passado balancar (usado na tela de vencedor)
-            let shakeRotCount = 0; //rotacao para a funcao shake
+        function shakePos(elem){ //faz o elemento passado balancar (usado na tela de vencedor)
             shakeIntervalID = setInterval(frame, 5);
-
             function frame(){
-                if(shakeRotCount <= 30){
+                if(shakeRotCount <= 25){
                     elem.style.transform = 'rotate(' + shakeRotCount + 'deg)';
                     shakeRotCount++;
                 }
-
                 else{
-                    shakeRotCount = -70;
-                    elem.style.transform = 'rotate(' + shakeRotCount + 'deg)';
-                    shakeRotCount--;
+                    clearInterval(shakeIntervalID);
+                    shakeNeg(elem);
                     }
+            }
+        }
 
+        function shakeNeg(elem){
+            shakeIntervalID = setInterval(frame2, 5);
+            function frame2(){
+                if(shakeRotCount >= -25){
+                    elem.style.transform = 'rotate(' + shakeRotCount + 'deg)';
+                        shakeRotCount--;
+                }
+                else{
+                        clearInterval(shakeIntervalID);
+                        shakePos(elem);
+                        }
             }
         }
         
@@ -245,8 +257,8 @@
             p2.style.display = 'none';
             winnerContainer.style.display = 'block';
             winnerContainer.textContent = player + " WON!!";
-            //blink(winnerContainer);
-            shake(winnerContainer);
+            blink(winnerContainer);
+            shakePos(winnerContainer);
         }
 
         result.style.display = "none";
