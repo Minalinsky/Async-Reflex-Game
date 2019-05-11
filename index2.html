@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Async Reaction Game</title>
+    <style>
+      /* General styles */
+      html {
+        background-color: white;
+        height: 100%;
+        font-family: sans-serif;
+      }
+      body {
+        height: inherit;
+        background-color: rgba(0, 112, 177, 0.808);
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      /* UI Layout */
+      section {
+        width: 100%;
+        height: inherit;
+        padding: 30px;
+      }
+
+      #winner{
+        margin: auto;
+        max-width: 70%;
+        align-self: center;
+        border: 12px solid;
+        border-color: rgb(255, 102, 0);
+        color: rgb(255, 102, 0);
+        font-size: 8rem;
+        word-wrap: break-word;
+        text-align: center;
+      }
+      .topbar {
+        height: 50%;
+        display: flex;
+        justify-content: space-between;
+      }
+      .topbar p, button {
+        margin: 0;
+        font-size: 1.5rem;
+        border: 5px solid;
+        border-radius: 20px;
+        padding: 10px 20px;
+      }
+      .p1, .p2 {
+        align-self: flex-start;
+      }
+      .topbar .p1 {
+        order: 0;
+        border-color: yellow;
+        color: yellow;
+      }
+      .topbar .p2 {
+        order: 2;
+        border-color: cyan;
+        color: cyan;
+      }
+      .topbar .middlebar {
+        order: 1;
+      }
+      .middlebar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .instructions{
+          font-size: 110%;
+      }
+      /* Button-specific styling */
+      button {
+        border: 0;
+        padding: 12.75px 20px;
+        background-color: #ddd;
+        cursor: pointer;
+      }
+      button:hover, button:focus {
+        background-color: #eee;
+      }
+      button:active {
+        background-color: #fff;
+      }
+      /* spinner-specific styling */
+      .spinner {
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+      .spinner div {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .spinner p {
+        margin: 0;
+        font-size: 10rem;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="spinner"><div><p>↻</p></div></div>
+
+    <section class="ui">
+      <div class="topbar">
+        <p class="p1">Player 1: 'A' <br> Score: 0</p>
+        <p class="p2">Player 2: 'L'<br> Score: 0</p>
+        <div class="middlebar">
+          <button>Start game</button>
+          <p class="result"></p>
+        </div>
+    </div>
+    <p class = "instructions"> 
+       Diferenças de abordagens em relação ao primeiro jogo: <br><br>
+        - O setTimeout da função start() é implementado em uma Promise (startTimeoutPromise())<br>
+        - Todos os setInterval são implementados em uma Promise<br>
+        - A lógica do jogo em si não foi alterada, porém com o uso de Promises, a lógica das funções que usam setInterval e setTimeout
+        teve que ser modificada, retornando um array contendo a referência (ou identificador) para o setInterval ou setTimeout executado<br>
+    </p>
+
+      <p id = "winner">WINNER</p>
+    </section>
+    <script>
+        var scorep1 = 0;
+        var scorep2 = 0;
+        var p1 = document.querySelector('.p1');
+        var p2 = document.querySelector('.p2');
+
+        const winnerContainer = document.getElementById("winner");
+        winnerContainer.style.display = 'none';
+        const winCondition = 1; //Quantidade de rounds ganhos para vencer
+        const spinner = document.querySelector('.spinner p'); //elemento que contém o simbolo ↻ que irá rotacionar
+        const spinnerContainer = document.querySelector('.spinner');
+        let rotateCount = 0;
+        let startTime = null;
+        let rAF;
+        let shakeRotCount = 0; //rotacao para as funcoes shake
+        const btn = document.querySelector('button'); //botao de Start
+        const result = document.querySelector('.result');
+
+        var shakeIntervalID = null;
+        var blinkIntervalID = null;
+
+        function random(min,max) {
+            var num = Math.floor(Math.random()*(max-min)) + min;
+            return num;
+        }
+
+        function draw(timestamp) {
+            if(!startTime) {
+            startTime = timestamp;
+            }
+
+            let rotateCount = (timestamp - startTime) / 3; //velocidade da animação. Dividimos por 3 para ñ ficar muito rápido
+            spinner.style.transform = 'rotate(' + rotateCount + 'deg)'; //fazendo a rotação
+
+            if(rotateCount > 359) { //resetando a animação para a posicao inicial qdo completar uma volta.
+            rotateCount -= 360;
+            }
+            rAF = requestAnimationFrame(draw); 
+        }
+
+        function reset() { //volta o jogo ao estado inicial para recomeçá-lo
+            if((scorep1 || scorep2) >= winCondition){
+                scorep1 = 0;
+                scorep2 = 0;
+                p1.innerHTML = "Player 1: 'A' <br> Score: 0";
+                p2.innerHTML = "Player 1: 'A' <br> Score: 0";
+            }
+            clearInterval(shakeIntervalID);
+            clearInterval(blinkIntervalID);
+            btn.style.display = 'block';
+            p1.style.display = 'block';
+            p2.style.display = 'block';
+            result.textContent = '';
+            result.style.display = 'none';
+            winnerContainer.style.display = 'none';
+            clearInterval(shakeIntervalID);
+        }
+
+        function start() { //chamada ao apertar o botao de Play
+            document.querySelector('.instructions').style.display = 'none'; //apaga as instruções da tela na primeira execução
+            draw();
+            spinnerContainer.style.display = 'block';
+            btn.style.display = 'none';
+            startTimeoutPromise(random(2000,7000)); //sorteia o tempo até os jogadores poderem apertar as teclas
+        }
+
+        function setEndgame() { //libera os jogadores para apertar as teclas
+            cancelAnimationFrame(rAF);
+            spinnerContainer.style.display = 'none';
+            result.style.display = 'block';
+            result.textContent = 'PLAYERS GO!!';
+
+            document.addEventListener('keydown', keyHandler); //EventListener para identificar quando uma tecla é apertada
+
+            function keyHandler(e) { //funcao para identificar quan tecla foi apertada
+                console.log(e.key);
+                if(e.key === 'a') {
+                    scorep1++;
+                    console.log("scorep1: " + scorep1); //imprimindo no console a pontuacao
+                    p1.innerHTML = "Player 1: 'A' <br>Score: " + scorep1;
+                    result.textContent = 'Player 1 won!!';
+                    if(scorep1 >= winCondition){ //se p1 fez 5 pontos (venceu)
+                        winner("Player1"); //passa a string Player1 como parametro de winner, que ira finalizar o jogo
+                    }
+                } else if(e.key === 'l') {
+                    scorep2++;
+                    console.log("scorep2: " + scorep1); //imprimindo no console a pontuacao
+                    p2.innerHTML = "Player 2: 'L' <br>Score: " + scorep2;
+                    result.textContent = 'Player 2 won!!';
+                    if(scorep2 >= winCondition){ //se p2 fez 5 pontos (venceu a partida)
+                        winner("Player2"); //passa a string Player2 como parametro de winner
+                    }
+                }
+                document.removeEventListener('keydown', keyHandler); 
+                setTimeout(reset, 5000); //após 5s reseta o jogo para o estado inicial
+            };
+        }
+
+        function blink(elem) { //faz o elemento passado piscar na tela
+          let arr = setIntervalPromise(blinkInterval, 400);
+          function blinkInterval() {
+                elem.style.display = (elem.style.display == 'none' ? '' : 'none');
+            }
+            blinkIntervalID = arr[1]; //pegando o intervalID retornado no array da funcao
+        }
+
+        function shakePos(elem){ //faz o elemento passado balancar (usado na tela de vencedor)
+          let arr = setIntervalPromise(frame, 5);
+          shakeIntervalID = arr[1];
+            function frame(){
+                if(shakeRotCount <= 25){ //angulo de rotacao
+                    elem.style.transform = 'rotate(' + shakeRotCount + 'deg)';
+                    shakeRotCount++;
+                }
+                else{
+                    clearInterval(shakeIntervalID);
+                    shakeNeg(elem);
+                    }
+            }
+        }
+
+        function shakeNeg(elem){
+          let arr = setIntervalPromise(frame2, 5);
+          shakeIntervalID = arr[1];
+            function frame2(){
+                if(shakeRotCount >= -25){
+                    elem.style.transform = 'rotate(' + shakeRotCount + 'deg)';
+                        shakeRotCount--;
+                }
+                else{
+                        clearInterval(shakeIntervalID);
+                        shakePos(elem);
+                      }
+            }
+        }
+        
+        function winner(player){ //recebe o jogador vencedor e mostra na tela
+            result.style.display = 'none';
+            p1.style.display = 'none';
+            p2.style.display = 'none';
+            winnerContainer.style.display = 'block';
+            winnerContainer.textContent = player + " WON!!";
+            blink(winnerContainer);
+            shakePos(winnerContainer);
+        }
+
+        function setIntervalPromise (func, delay){ //retorna um array contendo a promise gerada e o id/referencia ao intervalo
+          let intID = null;
+          let myPromise = new Promise((resolve, reject) => {
+            intID = setInterval(func, delay);
+            resolve("interval done");
+          });
+          return [myPromise, intID];
+        }
+
+        function startTimeoutPromise(interval){
+          return new Promise((resolve, reject) => {
+            setTimeout(function (){
+              setEndgame();
+              resolve("start timeout done");
+            }, interval);
+          });
+        }
+
+        result.style.display = "none";
+        spinnerContainer.style.display = "none";
+        btn.addEventListener('click', start);
+
+    </script>
+  </body>
+</html>
