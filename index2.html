@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Async Reaction Game</title>
+    <title>Async Reaction Game 2!</title>
     <style>
       /* General styles */
       html {
@@ -121,14 +121,15 @@
         </div>
     </div>
     <p class = "instructions"> 
+      nUSP: 8532269 e 10550198 <br>
        Diferenças de abordagens em relação ao primeiro jogo: <br><br>
         - O setTimeout da função start() é implementado em uma Promise (startTimeoutPromise())<br>
-        - Todos os setInterval são implementados em uma Promise<br>
-        - A lógica do jogo em si não foi alterada, porém com o uso de Promises, a lógica das funções que usam setInterval e setTimeout
-        teve que ser modificada, retornando um array contendo a referência (ou identificador) para o setInterval ou setTimeout executado<br>
+        - Todos os setInterval são implementados com Promises<br>
+        - A lógica do jogo em si não foi alterada, porém com o uso de Promises, as lógicas das funções que usam setInterval e setTimeout
+        tiveram que ser modificadas, retornando um array contendo a referência (ou identificador) para o setInterval ou setTimeout executado<br>
     </p>
 
-      <p id = "winner">WINNER</p>
+      <p id = "winner"></p>
     </section>
     <script>
         var scorep1 = 0;
@@ -138,7 +139,7 @@
 
         const winnerContainer = document.getElementById("winner");
         winnerContainer.style.display = 'none';
-        const winCondition = 1; //Quantidade de rounds ganhos para vencer
+        const winCondition = 5; //Quantidade de rounds ganhos para vencer
         const spinner = document.querySelector('.spinner p'); //elemento que contém o simbolo ↻ que irá rotacionar
         const spinnerContainer = document.querySelector('.spinner');
         let rotateCount = 0;
@@ -293,7 +294,6 @@
             }, interval);
           });
         }
-
         result.style.display = "none";
         spinnerContainer.style.display = "none";
         btn.addEventListener('click', start);
