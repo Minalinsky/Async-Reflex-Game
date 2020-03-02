@@ -1,5 +1,4 @@
 # Async-Reflex-Game
-nUSP: 8532269 e 10550198
 Jogo implementado com técnicas assíncronas de JavaScript.
 
 
